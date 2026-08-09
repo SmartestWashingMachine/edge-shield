@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/jetbrains-mono';
+
+/**
+ * Design system: monochrome + a single semantic axis.
+ *
+ * Every surface, border and label in the app is greyscale. Saturated colour is
+ * reserved *exclusively* for the verdict readout, so the one thing the app
+ * exists to communicate is the only thing on screen with a hue. Adding an
+ * accent colour anywhere else would dilute that signal.
+ */
+@theme {
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  --font-sans: var(--font-mono);
+
+  /* Greyscale surfaces, darkest to lightest. */
+  --color-void: oklch(0.145 0.005 285);
+  --color-panel: oklch(0.185 0.005 285);
+  --color-raised: oklch(0.225 0.005 285);
+  --color-hairline: oklch(0.285 0.006 285);
+  --color-hairline-strong: oklch(0.36 0.007 285);
+
+  /* Greyscale text. */
+  --color-ink: oklch(0.94 0.003 285);
+  --color-ink-dim: oklch(0.71 0.006 285);
+  --color-ink-faint: oklch(0.55 0.008 285);
+
+  /* The semantic axis — the ONLY hues in the application.
+     Two palettes, deliberately: the danger pair (flag/pass) is used only when
+     the query actually asked a safety question, and the neutral pair
+     (affirm/negate) when it asked something else or was hand-written. So the
+     palette itself says whether a safety judgement was made. */
+  --color-pass: oklch(0.78 0.13 195);
+  --color-pass-dim: oklch(0.45 0.07 195);
+  --color-flag: oklch(0.72 0.19 35);
+  --color-flag-dim: oklch(0.43 0.11 35);
+  --color-affirm: oklch(0.7 0.14 255);
+  --color-negate: oklch(0.75 0.15 155);
+  --color-unknown: oklch(0.75 0.11 95);
+  --color-unknown-dim: oklch(0.44 0.06 95);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Sweep used by the indeterminate progress bar during wasm/context setup,
+   where there is genuinely no progress figure to report. */
+@keyframes shift {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+/* Focus ring stays greyscale so it never competes with the verdict. */
+:focus-visible {
+  outline: 1px solid var(--color-ink-dim);
+  outline-offset: 2px;
+}
+
+/* A faint scanline texture behind the header — reads as "instrument panel"
+   without introducing any colour. */
+.grid-backdrop {
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--color-hairline) 55%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 100% 4px;
+}
+
+/* Range input restyled to a hairline track with a square handle, matching the
+   instrument-panel language. Vendor pseudo-elements can't be merged. */
+input[type='range'] {
+  appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--color-hairline-strong);
+}
+input[type='range']::-moz-range-track {
+  height: 2px;
+  background: var(--color-hairline-strong);
+}
+input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  width: 3px;
+  height: 18px;
+  margin-top: -8px;
+  border-radius: 0;
+  background: var(--color-ink);
+}
+input[type='range']::-moz-range-thumb {
+  width: 3px;
+  height: 18px;
+  border: none;
+  border-radius: 0;
+  background: var(--color-ink);
+}
