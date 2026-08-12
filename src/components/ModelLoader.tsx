@@ -54,7 +54,7 @@ export function ModelStatusStrip({ state, onCancel }: { state: LoadState; onCanc
       )}
       {state.phase === 'downloading' && <ProgressBar value={state.progress} />}
 
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-2.5 text-[11px]">
+      <div className="mx-auto flex w-full max-w-[1600px] flex-wrap items-center gap-x-5 gap-y-2 px-6 py-2.5 text-[11px]">
         {state.phase === 'checking-cache' && <span className="text-ink-dim">Checking local cache…</span>}
 
         {state.phase === 'downloading' && (

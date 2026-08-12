@@ -14,15 +14,17 @@ import { Button, Field, Panel, PanelHeader, TextArea } from './ui/primitives'
 export function PolicyPanel({
   value,
   onChange,
+  className,
 }: {
   value: EvaluationInput
   onChange: (next: EvaluationInput) => void
+  className?: string
 }) {
   const instructId = useId()
   const queryId = useId()
 
   return (
-    <Panel>
+    <Panel className={className}>
       <PanelHeader title="Policy" />
       <div className="flex flex-col gap-6 px-5 py-5">
         <Field
@@ -77,29 +79,40 @@ export function DocumentPanel({
   value,
   onChange,
   onSubmit,
-  disabled,
+  busyLabel,
   running,
+  className,
 }: {
   value: EvaluationInput
   onChange: (next: EvaluationInput) => void
-  onSubmit: () => void
-  disabled: boolean
+  onSubmit: () => void | Promise<void>
+  /**
+   * Non-null while the model is loading, in which case it replaces the button
+   * label. Evaluate stays clickable before the model exists — it loads first
+   * and then runs, so getting a score is never a two-step affair.
+   */
+  busyLabel: string | null
   running: boolean
+  className?: string
 }) {
   const documentId = useId()
-  const canSubmit = !disabled && !running && isEvaluable(value)
+  const busy = busyLabel !== null || running
+  const canSubmit = !busy && isEvaluable(value)
 
   return (
-    <Panel>
-      <PanelHeader title="Document" />
+    // Stretches to match Policy's height in the same grid row, with the
+    // textarea taking up the slack rather than leaving dead space at the bottom.
+    <Panel className={`flex flex-col ${className ?? ''}`}>
+      <PanelHeader title="Input" />
       <form
-        className="flex flex-col gap-5 px-5 py-5"
+        className="flex flex-1 flex-col gap-5 px-5 py-5"
         onSubmit={(event) => {
           event.preventDefault()
           if (canSubmit) onSubmit()
         }}
       >
         <Field
+          className="min-h-0 flex-1"
           label="Document"
           htmlFor={documentId}
           hint="The content under evaluation. Never leaves this tab."
@@ -116,6 +129,7 @@ export function DocumentPanel({
           <TextArea
             id={documentId}
             rows={12}
+            className="min-h-0 flex-1"
             value={value.document}
             onChange={(e) => onChange({ ...value, document: e.target.value })}
             placeholder="Paste the text to classify…"
@@ -124,9 +138,8 @@ export function DocumentPanel({
 
         <div className="flex items-center gap-4">
           <Button type="submit" variant="primary" disabled={!canSubmit}>
-            {running ? 'Evaluating…' : 'Evaluate'}
+            {busyLabel ?? (running ? 'Evaluating…' : 'Evaluate')}
           </Button>
-          {disabled && <span className="text-[11px] text-ink-faint">Load the model first</span>}
         </div>
       </form>
     </Panel>

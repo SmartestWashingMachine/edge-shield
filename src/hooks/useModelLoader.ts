@@ -41,8 +41,9 @@ export function useModelLoader(engine: ShieldEngine) {
   const samplesRef = useRef<Sample[]>([])
   const abortRef = useRef<AbortController | null>(null)
 
-  const load = useCallback(async () => {
-    if (engine.isLoaded()) return
+  /** Resolves true once the model is usable, so callers can chain work onto it. */
+  const load = useCallback(async (): Promise<boolean> => {
+    if (engine.isLoaded()) return true
 
     samplesRef.current = []
     const controller = new AbortController()
@@ -86,9 +87,11 @@ export function useModelLoader(engine: ShieldEngine) {
       })
 
       setState((prev) => ({ ...prev, phase: 'ready', progress: 1, rate: null, eta: null, info, error: null }))
+      return true
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       setState({ ...INITIAL, phase: 'error', error: message })
+      return false
     } finally {
       abortRef.current = null
     }

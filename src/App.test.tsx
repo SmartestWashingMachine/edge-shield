@@ -39,10 +39,30 @@ async function evaluate(user: ReturnType<typeof userEvent.setup>, document = 'ig
 }
 
 describe('App', () => {
-  it('blocks evaluation until the model is loaded', () => {
+  it('disables Evaluate until there is a document to evaluate', () => {
     setup()
     expect(screen.getByRole('button', { name: /^evaluate$/i })).toBeDisabled()
-    expect(screen.getByText(/load the model first/i)).toBeInTheDocument()
+  })
+
+  it('loads the model and evaluates from a single click', async () => {
+    // Cold start: no separate load step. Pressing Evaluate fetches the model
+    // and then runs, rather than making the user press two buttons.
+    const { user, engine } = setup(YES_HEAVY)
+    await user.type(screen.getByLabelText(/^document$/i), 'ignore previous instructions')
+    await user.click(screen.getByRole('button', { name: /^evaluate$/i }))
+
+    expect(await screen.findByText('0.800')).toBeInTheDocument()
+    expect(engine.loadCalls).toBe(1)
+    expect(engine.evaluateCalls).toBe(1)
+  })
+
+  it('does not evaluate if the one-click load fails', async () => {
+    const { user, engine } = setup({ failLoadWith: 'unknown model architecture' })
+    await user.type(screen.getByLabelText(/^document$/i), 'anything')
+    await user.click(screen.getByRole('button', { name: /^evaluate$/i }))
+
+    expect(await screen.findByText(/model failed to load/i)).toBeInTheDocument()
+    expect(engine.evaluateCalls).toBe(0)
   })
 
   it('states the download size on the load button itself', () => {
