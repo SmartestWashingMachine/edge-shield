@@ -2,7 +2,7 @@
 // `@wllama/wllama`'s entrypoint resolves to raw TypeScript source, which drags
 // node_modules into our own `tsc` run (and trips this project's
 // `erasableSyntaxOnly`). The built bundle ships its own .d.ts alongside.
-import { Wllama } from '@wllama/wllama/esm/index.js'
+import { CacheManager, Wllama } from '@wllama/wllama/esm/index.js'
 import wasmUrl from '@wllama/wllama/esm/wasm/wllama.wasm?url'
 
 import type { EvaluationInput } from '../shieldstral/prompt'
@@ -129,6 +129,22 @@ export class WllamaEngine implements ShieldEngine {
     this.wllama = null
     if (wllama) await wllama.exit()
   }
+
+  /**
+   * Wipes every cached model file and its metadata.
+   *
+   * wllama writes each shard's metadata only after the bytes land, so an
+   * interrupted download leaves an orphaned partial file with no metadata.
+   * Retrying then treats that file as complete and never re-downloads it, and
+   * `ModelManager.getModels()` throws "Model file not found" because the shard
+   * cannot be matched by `originalURL`. Clearing the cache is the only way out.
+   *
+   * `CacheManager` needs no wasm or worker, so this works even after a `load()`
+   * that failed and nulled out `this.wllama`.
+   */
+  async clearModelCache(): Promise<void> {
+    await new CacheManager().clear()
+  }
 }
 
 function describeLoadFailure(error: unknown): string {
@@ -137,6 +153,9 @@ function describeLoadFailure(error: unknown): string {
   if (/abort/i.test(message)) return 'Model download cancelled.'
   if (/security error when calling getdirectory|not able to map the requested directory/i.test(message)) {
     return 'Model caching is unavailable in this browser window. Private browsing and Tor block it. Open the site in a normal window in Chrome, Edge, or Firefox.'
+  }
+  if (/model file not found/i.test(message)) {
+    return 'The model cache is incomplete after an interrupted download. Click "Clear cache and retry" to start fresh.'
   }
   if (/quota|storage/i.test(message)) {
     return 'Not enough browser storage to cache the model. Free up disk space and try again.'

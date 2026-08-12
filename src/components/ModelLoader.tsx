@@ -44,7 +44,15 @@ export function ModelButton({ state, onLoad }: { state: LoadState; onLoad: () =>
  * several seconds. Conflating them makes the app look frozen, so each gets its
  * own copy and its own bar treatment.
  */
-export function ModelStatusStrip({ state, onCancel }: { state: LoadState; onCancel: () => void }) {
+export function ModelStatusStrip({
+  state,
+  onCancel,
+  onClearAndReload,
+}: {
+  state: LoadState
+  onCancel: () => void
+  onClearAndReload: () => void
+}) {
   if (state.phase === 'idle') return null
 
   return (
@@ -99,6 +107,11 @@ export function ModelStatusStrip({ state, onCancel }: { state: LoadState; onCanc
           <>
             <span className="text-flag">Model failed to load</span>
             <span className="text-ink-dim">{state.error ?? 'Unknown error.'}</span>
+            <div className="ml-auto flex items-center gap-2">
+              <Button className="!px-2 !py-0.5" onClick={onClearAndReload}>
+                Clear cache and retry
+              </Button>
+            </div>
           </>
         )}
       </div>

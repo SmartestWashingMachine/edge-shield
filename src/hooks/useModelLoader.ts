@@ -101,9 +101,20 @@ export function useModelLoader(engine: ShieldEngine) {
     abortRef.current?.abort()
   }, [])
 
+  /**
+   * Wipe the on-device cache, then start a fresh load. The only way out of a
+   * cache corrupted by an interrupted download, where plain retry fails
+   * forever.
+   */
+  const clearAndReload = useCallback(async (): Promise<boolean> => {
+    setState({ ...INITIAL, phase: 'checking-cache' })
+    await engine.clearModelCache()
+    return load()
+  }, [engine, load])
+
   const reset = useCallback(() => {
     setState(INITIAL)
   }, [])
 
-  return { state, load, cancel, reset }
+  return { state, load, cancel, clearAndReload, reset }
 }

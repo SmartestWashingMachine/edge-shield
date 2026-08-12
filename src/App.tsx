@@ -24,7 +24,7 @@ import { WllamaEngine } from './lib/wllama/wllamaEngine'
 export default function App({ createEngine = () => new WllamaEngine() }: { createEngine?: () => ShieldEngine }) {
   const [engine] = useState(() => createEngine())
 
-  const { state: loadState, load, cancel } = useModelLoader(engine)
+  const { state: loadState, load, cancel, clearAndReload } = useModelLoader(engine)
   const { status, result, error, run } = useEvaluation(engine)
 
   const [input, setInput] = useState(defaultEvaluationInput)
@@ -46,7 +46,7 @@ export default function App({ createEngine = () => new WllamaEngine() }: { creat
   return (
     <AppShell
       headerAction={<ModelButton state={loadState} onLoad={load} />}
-      statusStrip={<ModelStatusStrip state={loadState} onCancel={cancel} />}
+      statusStrip={<ModelStatusStrip state={loadState} onCancel={cancel} onClearAndReload={clearAndReload} />}
     >
       <ScenarioBar value={input} onLoad={setInput} />
 

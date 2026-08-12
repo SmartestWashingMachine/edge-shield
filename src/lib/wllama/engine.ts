@@ -13,6 +13,8 @@ export interface ShieldEngine {
   evaluate(input: EvaluationInput, signal?: AbortSignal): Promise<RawEvaluation>
   isLoaded(): boolean
   dispose(): Promise<void>
+  /** Wipes the on-device model cache, e.g. after an interrupted download leaves it corrupt. */
+  clearModelCache(): Promise<void>
 }
 
 export interface DownloadProgress {

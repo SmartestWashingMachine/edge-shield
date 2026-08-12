@@ -94,4 +94,6 @@ export class FakeEngine implements ShieldEngine {
   async dispose(): Promise<void> {
     this.loaded = false
   }
+
+  async clearModelCache(): Promise<void> {}
 }
