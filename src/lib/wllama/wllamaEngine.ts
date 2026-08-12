@@ -135,6 +135,9 @@ function describeLoadFailure(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error)
 
   if (/abort/i.test(message)) return 'Model download cancelled.'
+  if (/security error when calling getdirectory|not able to map the requested directory/i.test(message)) {
+    return 'Model caching is unavailable in this browser window. Private browsing and Tor block it. Open the site in a normal window in Chrome, Edge, or Firefox.'
+  }
   if (/quota|storage/i.test(message)) {
     return 'Not enough browser storage to cache the model. Free up disk space and try again.'
   }
