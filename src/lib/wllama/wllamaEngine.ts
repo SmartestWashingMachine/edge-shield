@@ -30,7 +30,7 @@ export class WllamaEngine implements ShieldEngine {
   async load({ onProgress, onInitialising, signal }: LoadOptions): Promise<LoadedInfo> {
     if (this.loaded) throw new EngineError('Model is already loaded.')
 
-    const wllama = new Wllama({ default: wasmUrl }, { parallelDownloads: 5, }) // 4 files in Q3_K_M... annoying...
+    const wllama = new Wllama({ default: wasmUrl }, { parallelDownloads: 1, }) // 4 files in Q3_K_M... annoying...
     this.wllama = wllama
 
     let sawFinalByte = false
